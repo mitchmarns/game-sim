@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hockey Team Assignment</title>
+  <script src="https://kit.fontawesome.com/08698b12f5.js" crossorigin="anonymous"></script>
+  
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../styles/styles.css">
+</head>
+<body>
+    <h1>Drag and Drop to Assign Players to Teams</h1><br>
+    <div id="controls">
+      <button id="reset-teams-btn" class="remove-btn">Reset Teams</button>
+    </div>
+    
+    <!-- Input field to add/rename teams -->
+    <div id="team-management">
+      <input type="text" id="team-name-input" placeholder="Enter team name" />
+      <button id="add-team-btn" class="remove-btn">Add Team</button>
+    </div>
+  
+    <!-- Unassigned players box -->
+    <div class="unassigned-box" id="unassigned-box">
+      <!-- Players will be added dynamically here -->
+    </div>
+  
+    <!-- Teams container -->
+    <div id="teams"></div>
+
+  <script src="../js/teams.js"></script>
+</body>
+</html>
