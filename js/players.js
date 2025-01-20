@@ -43,6 +43,8 @@ const starterBackupSkills = {
   };
   
 document.getElementById('player-position').addEventListener('change', updateSkills);
+document.getElementById('add-player-btn').addEventListener('click', addOrEditPlayer);
+
 
 function updateSkills() {
     const position = document.getElementById('player-position').value;
@@ -125,12 +127,13 @@ function savePlayers(players) {
 // Render players in the list
 function renderPlayerList(players) {
   const playerList = document.getElementById('player-list');
-  playerList.innerHTML = '';
+  playerList.innerHTML = ''; 
   players.forEach(player => {
     const playerDiv = document.createElement('div');
     playerDiv.classList.add('player-card');
     playerDiv.innerHTML = `
       <img src="${player.image}" alt="${player.name}" class="player-image" />
+      <p><strong>ID:</strong> ${player.id}</p>  <!-- Display the ID here -->
       <p><strong>Name:</strong> ${player.name}</p>
       <p><strong>Position:</strong> ${player.position}</p>
       <p><strong>Age:</strong> ${player.age}</p>
@@ -143,76 +146,84 @@ function renderPlayerList(players) {
 
 // Add or edit a player
 function addOrEditPlayer() {
-    const id = document.getElementById('player-id').value;
-    const name = document.getElementById('player-name').value.trim();
-    const position = document.getElementById('player-position').value.trim();
-    const age = parseInt(document.getElementById('player-age').value.trim());
-    const image = document.getElementById('player-image').value.trim();
-  
-    const skills = {};
-    document.querySelectorAll('.skill-input').forEach(input => {
-      skills[input.name] = parseInt(input.value.trim()) || 0;
-    });
-  
-    if (!name || !position || isNaN(age) || !image) {
-      alert('Please fill out all fields correctly.');
-      return;
-    }
-  
-    loadPlayers().then(players => {
-      if (id) {
-        const playerIndex = players.findIndex(p => p.id === parseInt(id));
-        if (playerIndex !== -1) {
-          players[playerIndex] = { ...players[playerIndex], name, position, age, image, skills };
-        }
-      } else {
-        const newPlayer = {
-          id: players.length > 0 ? players[players.length - 1].id + 1 : 1,
-          name,
-          position,
-          age,
-          assigned: false,
-          lineAssigned: null,
-          lineAssignments: null,
-          specialTeamAssigned: null,
-          team: null,
-          injured: false,
-          healthyScratch: false,
-          image,
-          skills,
-        };
-        players.push(newPlayer);
-      }
-  
-      savePlayers(players);
-      renderPlayerList(players);
-      document.getElementById('player-form').reset();
-    });
+  const id = document.getElementById('player-id').value; // Get player ID
+  const name = document.getElementById('player-name').value.trim();
+  const position = document.getElementById('player-position').value.trim();
+  const age = parseInt(document.getElementById('player-age').value.trim(), 10);
+  const image = document.getElementById('player-image').value.trim();
+
+  const skills = {};
+  document.querySelectorAll('.skill-input').forEach(input => {
+    skills[input.name] = parseInt(input.value.trim()) || 0;
+  });
+
+  if (!name || !position || isNaN(age) || !image) {
+    alert('Please fill out all fields correctly.');
+    return;
   }
+
+  loadPlayers().then(players => {
+    if (!id) {
+      // Add new player with unique ID if no ID is provided (new player)
+      const existingPlayer = players.find(p => p.name === name);
+      if (existingPlayer) {
+        alert('Error: A player with this name already exists. Please pick a unique name.');
+        return; 
+      }
+
+      const newPlayer = {
+        id: players.length > 0 ? players[players.length - 1].id + 1 : 1, 
+        name,
+        position,
+        age,
+        assigned: false,
+        lineAssigned: null,
+        lineAssignments: null,
+        specialTeamAssigned: null,
+        team: null,
+        injured: false,
+        healthyScratch: false,
+        image,
+        skills,
+      };
+      players.push(newPlayer);
+    } else {
+      // Edit existing player
+      const playerIndex = players.findIndex(p => p.id === parseInt(id, 10)); 
+      if (playerIndex !== -1) {
+        players[playerIndex] = { ...players[playerIndex], name, position, age, image, skills };
+      }
+    }
+
+    savePlayers(players);
+    renderPlayerList(players);
+    document.getElementById('player-form').reset(); 
+  });
+}
   
   // Populate form with existing player data, including skills
   function editPlayer(id) {
-  loadPlayers().then(players => {
-    const player = players.find(p => p.id === id);
-    if (player) {
-      // Populate form fields
-      document.getElementById('player-id').value = player.id;
-      document.getElementById('player-name').value = player.name;
-      document.getElementById('player-position').value = player.position;
-      document.getElementById('player-age').value = player.age;
-      document.getElementById('player-image').value = player.image;
-
-      // Update the skill set based on the position
-      updateSkills();  // Trigger skill update based on selected position
-
-      // Populate the skill inputs with existing data
-      Object.entries(player.skills).forEach(([key, value]) => {
-        const skillInput = document.querySelector(`.skill-input[name="${key}"]`);
-        if (skillInput) skillInput.value = value;
-      });
-    }
-  });
-}
+    loadPlayers().then(players => {
+      const player = players.find(p => p.id === id);
+      if (player) {
+        // Populate form fields
+        document.getElementById('player-id').value = player.id;
+        document.getElementById('player-name').value = player.name;
+        document.getElementById('player-position').value = player.position;
+        document.getElementById('player-age').value = player.age;
+        document.getElementById('player-image').value = player.image;
+  
+        // Update the skill set based on the position
+        updateSkills(); // Trigger skill update based on selected position
+  
+        // Populate the skill inputs with existing data
+        Object.entries(player.skills).forEach(([key, value]) => {
+          const skillInput = document.querySelector(`.skill-input[name="${key}"]`);
+          if (skillInput) skillInput.value = value;
+        });
+      }
+    });
+  }
   
   // Render skill inputs dynamically
   function renderSkillInputs(skills) {
